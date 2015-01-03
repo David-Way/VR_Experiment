@@ -21,17 +21,31 @@ viz.go()
 viz.MainWindow.fov(60)
 vizshape.addAxes()
 room = viz.addChild('pit.osgb')
+walls = viz.addChild('models/walls.osgb')
+walls.setScale(0.14, 0.14, 0.14)
+walls.setEuler( [ 90, 0, 0 ] )
+walls.setPosition([0,0,2.5])
+divider = viz.addChild('models/divider_1.osgb')
+divider.setScale(0.14, 0.14, 0.14)
+divider.setEuler( [ 90, 0, 0 ] )
+divider.setPosition([0,0,2.5])
+tables = viz.addChild('models/tables.osgb')
+tables.setScale(0.14, 0.14, 0.14)
+tables.setEuler( [ 90, 0, 0 ] )
+tables.setPosition([0,0,2.5])
 viz.collision(viz.ON)
 
 # Setup keyboard/mouse tracker
 tracker = vizcam.addWalkNavigate(moveScale=2.0)
-tracker.setPosition([0,1.8,0])
+tracker.setPosition([0,3.2,0])
 viz.link(tracker,viz.MainView)
 
 #build scene
 memorisationStation = viz.addChild('plant.osgb',pos=[0, 0, 10],scale=[1, 1, 1])
+memorisationStation.disable(viz.RENDERING)
 testStation = viz.addChild('plant.osgb',pos=[0, 0, -6],scale=[1, 1, 1])
-testStationSensor = vizproximity.Sensor(vizproximity.Box([3,3,3],center=[0,1.5,1]),source=testStation)
+testStation.disable(viz.RENDERING)
+testStationSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=testStation)
 target = vizproximity.Target(viz.MainView)
 
 #Create proximity manager
