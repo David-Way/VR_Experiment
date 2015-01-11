@@ -16,23 +16,21 @@ import vizfx.postprocess
 import vizinfo
 import vr_utils
 
+scale = 24
+
 viz.setMultiSample(4)
 viz.go()
 viz.MainWindow.fov(60)
 vizshape.addAxes()
-room = viz.addChild('pit.osgb')
-walls = viz.addChild('models/walls.osgb')
-walls.setScale(0.14, 0.14, 0.14)
-walls.setEuler( [ 90, 0, 0 ] )
-walls.setPosition([0,0,2.5])
-divider = viz.addChild('models/divider_1.osgb')
-divider.setScale(0.14, 0.14, 0.14)
-divider.setEuler( [ 90, 0, 0 ] )
-divider.setPosition([0,0,2.5])
-tables = viz.addChild('models/tables.osgb')
-tables.setScale(0.14, 0.14, 0.14)
-tables.setEuler( [ 90, 0, 0 ] )
-tables.setPosition([0,0,2.5])
+
+#load room and set scale
+walls = viz.addChild('models/new/room_large.osgb')
+walls.setScale(scale, scale, scale)
+#walls.setEuler( [ 90, 0, 0 ] )
+#walls.setPosition([0,0,2.5])
+roof = viz.addChild('models/new/roof_large.osgb')
+roof.setScale(scale, scale, scale)
+
 viz.collision(viz.ON)
 
 # Setup keyboard/mouse tracker
@@ -133,6 +131,14 @@ def participantInfo():
 		data.gender = 'male'
 	else:
 		data.gender = 'female'
+
+	#if the person is a menber of the group B
+	if (data.group == 'b'):
+		#load the diving wall an door
+		divider = viz.addChild('models/new/divider_large.osgb')
+		divider.setScale(scale, scale, scale)
+		door = viz.addChild('models/new/door_large.osgb')
+		door.setScale(scale, scale, scale)
 
 	participantInfo.remove()
 
