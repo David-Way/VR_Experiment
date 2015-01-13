@@ -16,13 +16,19 @@ import vizfx.postprocess
 import vizinfo
 import vr_utils
 
-scale = 24
+scale = 14
 
 viz.setMultiSample(4)
 viz.go()
 viz.MainWindow.fov(60)
-vizshape.addAxes()
+#vizshape.addAxes()
 
+# Setup keyboard/mouse tracker
+tracker = vizcam.addWalkNavigate(forward='w', backward='s', left='a', right='d', moveScale=1.0, turnScale=1.0)
+tracker.setPosition([0,1.8,10])
+viz.link(tracker,viz.MainView)
+
+#build scene
 #load room and set scale
 walls = viz.addChild('models/new/room_large.osgb')
 walls.setScale(scale, scale, scale)
@@ -31,17 +37,25 @@ walls.setScale(scale, scale, scale)
 roof = viz.addChild('models/new/roof_large.osgb')
 roof.setScale(scale, scale, scale)
 
+#load the diving wall and door, hide them
+divider = viz.addChild('models/new/divider_large_2.osgb')
+divider.setScale(scale, scale, scale)
+divider.setPosition([0,0,20])
+door = viz.addChild('models/new/door_large.osgb')
+door.setCenter([-0.05, 0, 0])
+door.setScale(scale, scale, scale)
+door.setPosition([0,0,20])
+
 viz.collision(viz.ON)
 
-# Setup keyboard/mouse tracker
-tracker = vizcam.addWalkNavigate(moveScale=2.0)
-tracker.setPosition([0,3.2,0])
-viz.link(tracker,viz.MainView)
-
-#build scene
 memorisationStation = viz.addChild('plant.osgb',pos=[0, 0, 10],scale=[1, 1, 1])
 memorisationStation.disable(viz.RENDERING)
-testStation = viz.addChild('plant.osgb',pos=[0, 0, -6],scale=[1, 1, 1])
+
+doorStation = viz.addChild('plant.osgb',pos=[0, 0, 0],scale=[1, 1, 1]);
+doorStation.disable(viz.RENDERING)
+doorStationSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=doorStation)
+
+testStation = viz.addChild('plant.osgb',pos=[0, 0, -12],scale=[1, 1, 1])
 testStation.disable(viz.RENDERING)
 testStationSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=testStation)
 target = vizproximity.Target(viz.MainView)
@@ -51,11 +65,19 @@ manager = vizproximity.Manager()
 
 #Add destination sensors to manager
 manager.addSensor(testStationSensor)
+manager.addSensor(doorStationSensor)
 #Add viewpoint target to manager
 manager.addTarget(target)
 
 #Toggle debug shapes with keypress
 vizact.onkeydown('t',manager.setDebug,viz.TOGGLE)
+
+def openDoor():
+	door.addAction( vizact.spin(0,1,0,90) )
+
+vizact.onkeydown('i',openDoor)
+
+
 
 #question class
 class Question:
@@ -100,7 +122,7 @@ def generateQuestions():
 
 def participantInfo():
 	#Add an InfoPanel with a title bar
-	participantInfo = vizinfo.InfoPanel('',title='Participant Information',align=viz.ALIGN_CENTER, icon=False)
+	participantInfo = vizinfo.InfoPanel('',title='Participant Information', align=viz.ALIGN_CENTER, icon=False)
 
 	#Add name and ID fields
 	textbox_first = participantInfo.addLabelItem('First Name',viz.addTextbox())
@@ -134,11 +156,8 @@ def participantInfo():
 
 	#if the person is a menber of the group B
 	if (data.group == 'b'):
-		#load the diving wall an door
-		divider = viz.addChild('models/new/divider_large.osgb')
-		divider.setScale(scale, scale, scale)
-		door = viz.addChild('models/new/door_large.osgb')
-		door.setScale(scale, scale, scale)
+		divider.setPosition([0,0,0])
+		door.setPosition([-0.65,0,0])
 
 	participantInfo.remove()
 
@@ -179,11 +198,22 @@ def movePhase(participant):
 	info.visible(viz.ON)
 	#message dependant on group A or B
 	if (participant.group == 'a'):
-		info.setText("Memorisation phase complete. \nPlease move to the station behind you, at the other end of the room, to continue.") 
+		info.setText("Memorisation phase complete. \nPlease move to the station behind you, at the other end of the room, to continue.")
 	else: 
-		info.setText("Memorisation phase complete. \nPlease move to the station behind you, through the door, to continue.") 
+		info.setText("Memorisation phase complete. \nPlease move to the station behind you, through the door, to continue.")
+		##open the door
+		divider.collideNone()
+		yield vizproximity.waitEnter(doorStationSensor)
+		doorAngle = 0;
+		door.addAction( vizact.spin(0,1,0,90) )
+		door.collideNone()
+		while (doorAngle < 90):
+			#door.setEuler([doorAngle,0,0])
+			doorAngle +=0.01
+
 	info.visible(viz.ON)
 
+	#wait untl ther reach the test table
 	yield vizproximity.waitEnter(testStationSensor)
 
 	info.setText("Testing phase started.")
@@ -192,7 +222,6 @@ def movePhase(participant):
 
 def testPhase(participant):
 	
-
 	result = Result("1")
 	#save the results to a document
 	saveResults(participant, result)
