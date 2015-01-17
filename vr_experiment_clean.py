@@ -1,4 +1,4 @@
-﻿'''
+'''
 
 Group A does not walk through boundary/door
 Group B walks through boundary/door
@@ -41,6 +41,19 @@ walls.disable(viz.PICKING)
 roof = viz.addChild('models/new/roof_large.osgb')
 roof.setScale(scale, scale, scale)
 roof.disable(viz.PICKING)
+
+#load the diving wall and door, hide them
+divider = viz.addChild('models/new/divider_large_2.osgb')
+divider.setScale(22, 22, 22)
+divider.setPosition([0,0,20])
+divider.disable(viz.PICKING)
+door = viz.addChild('models/new/door_large.osgb')
+door.setCenter([-0.05, 0, 0])
+door.setScale(scale, scale, scale)
+door.setPosition([0,0,20])
+door.disable(viz.PICKING)
+
+#Make Shapes
 #make shapes
 box1 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
 box1.setPosition([-1,1.35,12])
@@ -91,18 +104,6 @@ tri4 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.GREEN)
 tri4.setPosition([1.2,1.25,-12])
 tri4.name = 'TRIANGLE_GREEN'
 
-
-#load the diving wall and door, hide them
-divider = viz.addChild('models/new/divider_large_2.osgb')
-divider.setScale(22, 22, 22)
-divider.setPosition([0,0,20])
-divider.disable(viz.PICKING)
-door = viz.addChild('models/new/door_large.osgb')
-door.setCenter([-0.05, 0, 0])
-door.setScale(scale, scale, scale)
-door.setPosition([0,0,20])
-door.disable(viz.PICKING)
-
 viz.collision(viz.ON)
 
 memorisationStation = viz.addChild('plant.osgb',pos=[0, 0, 10],scale=[1, 1, 1])
@@ -134,47 +135,6 @@ manager.addTarget(target)
 #Toggle debug shapes with keypress
 vizact.onkeydown('t',manager.setDebug,viz.TOGGLE)
 
-def picker(button): 
-	if button == viz.MOUSEBUTTON_LEFT: 
-	    #Check if the mouse is over one of the shapes 
-	    item = viz.MainWindow.pick( info = True )
-	    #If there is an intersection 
-	    if item.valid: 
-	        #Add mouse over action
-	        item.object.remove()
-	        #Print the point where the line intersects the object.
-	        taskA.append(item.object.name)
-	        print taskA
-	        print "pick"
-
-	    item = viz.MainWindow.pick( info = False )
-
-	return
-
-
-def openDoor():
-	door.addAction( vizact.spin(0,1,0,90) )
-
-vizact.onkeydown('i',openDoor)
-
-
-
-#question class
-class Question:
-
-	#class variables, shared between all Question objects
-	questionCount = 0
-	totalTime = 0
-
-	#constructor initialises instance variables
-	def __init__(self, statement, possibleAnswers, correctAnswerIndex, timeGiven):
-		self.statement = statement
-		self. possibleAnswers = possibleAnswers
-		self.correctAnswerIndex = correctAnswerIndex
-		self.timeGiven = timeGiven
-		Question.questionCount += 1
-		Question.totalTime += timeGiven
-
 #result class
 class Result:
 	def __init__(self, correctAnswers):
@@ -187,17 +147,45 @@ class Result:
 startingInstructions = """
 W = UP, , S = DOWN, D = RIGHT, A = LEFT. \nPress the spacebar to continue and follow the instructions given"""
 
-tasks = [] #used to store the question objects
 taskA = []
-taskB = []
 
-def generateQuestions():
-	#statement, possibleAnswers[], correctAnswerIndex, timeGiven
-	tasks.append(Question("The door is red", ["The door is blue", "The door is yellow", "The door is red", "The door is green"], 2, 1))
-	tasks.append(Question("The cat is behind the door", ["The cat is beside the door", "The cat is behind the door", "The cat is behind the dog", "The cat is red"], 1, 1))
-	tasks.append(Question("The dog is in front of the cat", ["The dog is in front of the cat", "The dog is in front of the window", "The dog is in beside of the cat", "The dog is behind the cat"], 0, 1))
-	tasks.append(Question("The window is over the door", ["The window is behind the door", "The window is in the door", "The window is beside the door", "The window is over the door"], 3, 1))
-	return
+def pickObject(): 
+	while True:
+		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
+		#Check if the mouse is over one of the shapes 
+		item = viz.MainWindow.pick( info = True )
+		#If there is an intersection 
+		if item.valid: 
+			#Add mouse over action
+			item.object.remove()
+			#Print the point where the line intersects the object.
+			taskA.append(item.object)
+			viz.callback(viz.MOUSEDOWN_EVENT, 0)
+			print taskA[0].name
+			print taskA[0].getPosition()
+			print taskA[0].size
+			print taskA[0].colour
+			print "picked"
+			return
+
+
+def swapObject(): 
+	while True:
+		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
+		#Check if the mouse is over one of the shapes 
+		item = viz.MainWindow.pick( info = True )
+		#If there is an intersection 
+		if item.valid: 
+			#Add mouse over action
+			item.object.remove()
+			#Print the point where the line intersects the object.
+			taskA.append(item.object)
+			viz.callback(viz.MOUSEDOWN_EVENT, 0)
+			print taskA
+			print "swapped"
+			return
+
+
 
 def participantInfo():
 	#Add an InfoPanel with a title bar
@@ -243,13 +231,6 @@ def participantInfo():
 	# Return participant data
 	viztask.returnValue(data)
 
-def countDown(countDownLength, info):
-	while countDownLength >= 0:
-		yield viztask.waitTime(1)
-		info.setText("You have " + str(Question.totalTime) + " seconds to memorise the following " + str(Question.questionCount) + " scenes. \n Starting in: " + str(countDownLength))
-		countDownLength = countDownLength - 1
-	return
-
 def selectPhase(participant):
 	panel = vr_utils.displayOnCenterPanel("")
 	#Add vizinfo panel to display instructions
@@ -264,8 +245,8 @@ def selectPhase(participant):
 
 	panel.visible(viz.OFF)
 
-	viz.callback(viz.MOUSEDOWN_EVENT,picker)
-	yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
+	yield pickObject()
+	print "Done with waiting for mouse"
 
 	if (participant.group == 'b'):
 		##open the door
@@ -284,16 +265,20 @@ def selectPhase(participant):
 	return
 
 def swapPhase(participant):
+	#wait until the user selects a shape
+	yield swapObject()
+	print "Done with waiting for mouse"
 
-	yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
-
-
-	panel = vr_utils.displayOnCenterPanel("")
-	#Add vizinfo panel to display instructions
 	if (participant.group == 'a'):
-		panel.setText("Great!. Now just move back to the original desk")
+		panel = vr_utils.displayOnCenterPanel("Great!. Now just move back to the original desk")
 	else:
-		panel.setText("Great!. Now just move back to the original desk in the other room")	
+		panel = vr_utils.displayOnCenterPanel("Great!. Now just move back to the original desk in the other room")
+			
+	panel.visible(viz.ON)
+	yield viztask.waitTime(2)
+	panel.visible(viz.OFF)
+
+	if (participant.group == 'b'):
 		##open the door
 		divider.collideNone()
 		yield vizproximity.waitEnter(doorStationSensor)
@@ -303,12 +288,6 @@ def swapPhase(participant):
 		while (doorAngle < 90):
 			#door.setEuler([doorAngle,0,0])
 			doorAngle +=0.01
-
-	panel.visible(viz.ON)
-	#count the user in
-	yield viztask.waitTime(5)
-
-	panel.visible(viz.OFF)
 
 	#wait untl ther reach the test table
 	yield vizproximity.waitEnter(memorisationStationSensor)
@@ -322,13 +301,13 @@ def testPhase(participant):
 
 	panel.visible(viz.ON)
 	#count the user in
-	yield viztask.waitTime(3)
+	yield viztask.waitTime(2)
 
 	panel.visible(viz.OFF)
 
-	viz.callback(viz.MOUSEDOWN_EVENT,picker)
-	yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
-	
+	yield pickObject()
+	print "Done with waiting for mouse"
+
 	result = Result("1")
 	#save the results to a document
 	saveResults(participant, result)
@@ -352,7 +331,6 @@ def saveResults(participant, result):
 	return
 
 def init():
-	generateQuestions()
 	#collect participant information
 	participant = yield participantInfo()
 	panel = vr_utils.displayOnCenterPanel(startingInstructions)
