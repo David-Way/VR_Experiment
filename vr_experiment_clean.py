@@ -23,10 +23,11 @@ import vr_utils
 #Variables
 scale = 14
 walls = roof = divider = door = None
+bag1 = bag2 = None
 stationOne = stationTwo = stationOneSensor = stationTwoSensor = doorStation = doorStationSensor = None
-tracker = None
+viewTracker = mouseTracker = None
 taskA = []
-
+firstPickObject = secondPickObject = None
 #Strings
 startingInstructions = """Controls: W = Forward, S = Back, D = Right, A = Left. \nPress the spacebar to continue and follow the instructions given"""
 selectPhaseInstructionsGroupA = """Select the blue triangle, this will put it in your backpack. \nThen move to the desk behind you. \nSwap the shape in your backpack with the yellow sphere by clicking with the mouse"""
@@ -36,7 +37,9 @@ selectPhaseInstructionsGroupB = """Select the blue triangle, this will put it in
 vr_utils.init(viz, viztracker)
 
 # Setup keyboard/mouse tracker
-vr_utils.enableNavigation(tracker, viz)
+viewTracker = vr_utils.enableNavigation(viewTracker, mouseTracker, viz, viztracker)
+bag1 = vr_utils.makeBag(viewTracker, 1)
+bag2 = vr_utils.makeBag(viewTracker, 2)
 
 #Build the scene
 vr_utils.buildScene(walls, roof, scale)
@@ -44,9 +47,64 @@ vr_utils.buildScene(walls, roof, scale)
 #Add the shapes to the scene
 vr_utils.makeShapes(viz, vizshape)
 
-#Create proximty sensors/hit boxes
-vr_utils.addSensors(stationOne, stationTwo, stationOneSensor, stationTwoSensor, doorStation, doorStationSensor)
+def exitStationOne(e):
+	global bag1
+	#print bag1.getDst().name #returns the bag from the link (bag1)
+	bag1.postTrans([0,-0.5,0])
 
+def exitStationTwo(e):
+	global bag2
+	bag2.postTrans([0,-0.5,0])
+
+def enterStationOne(e):
+	global bag1
+	bag1.postTrans([0,0.5,0])
+
+def enterStationTwo(e):
+	global bag2
+	bag2.postTrans([0,0.5,0])
+
+def addSensors():
+	global stationOne, stationTwo, stationOneSensor, stationTwoSensor, doorStation, doorStationSensor
+	stationOne = viz.addChild('plant.osgb',pos=[0, 0, 10],scale=[1, 1, 1])
+	stationOne.disable(viz.PICKING)
+	stationOne.disable(viz.RENDERING)
+	stationOneSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=stationOne)
+
+	doorStation = viz.addChild('plant.osgb',pos=[0, 0, 0],scale=[1,1,1])
+	doorStation.disable(viz.PICKING)
+	doorStation.disable(viz.RENDERING)
+	#doorStationSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=doorStation)
+	doorStationSensor = vizproximity.Sensor(vizproximity.Box([2.5,2.5,3.5]),source=viz.Matrix.translate(0,1.75,0))
+
+	stationTwo = viz.addChild('plant.osgb',pos=[0, 0, -12],scale=[1, 1, 1])
+	stationTwo.disable(viz.PICKING)
+	stationTwo.disable(viz.RENDERING)
+	stationTwoSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=stationTwo)
+	target = vizproximity.Target(viz.MainView)
+
+	#Create proximity manager
+	manager = vizproximity.Manager()
+
+	#Add destination sensors to manager
+	manager.addSensor(stationOneSensor)
+	manager.addSensor(stationTwoSensor)
+	manager.addSensor(doorStationSensor)
+
+	manager.onExit(stationOneSensor, exitStationOne)
+	manager.onExit(stationTwoSensor, exitStationTwo)
+	manager.onEnter(stationOneSensor, enterStationOne)
+	manager.onEnter(stationTwoSensor, enterStationTwo)
+	
+	#Add viewpoint target to manager
+	manager.addTarget(target)
+
+	#Toggle debug shapes with keypress
+	vizact.onkeydown('t',manager.setDebug,viz.TOGGLE)
+
+#Create proximty sensors/hit boxes
+##addSensors(stationOne, stationTwo, stationOneSensor, stationTwoSensor, doorStation, doorStationSensor)
+addSensors()
 #Result class
 class Result:
 	def __init__(self, correctAnswers):
@@ -103,15 +161,13 @@ def getParticipantInfo():
 		door.setPosition([0,0,20])
 		door.disable(viz.PICKING)
 		divider.setPosition([0,0,0])
-		door.setPosition([-1,0,0])
-
+		door.setPosition([-0.6,0,0])
 	participantInfo.remove()
-
 	# Return participant data
 	viztask.returnValue(data)
 
-
 def pickObject(): 
+	global firstPickObject
 	while True:
 		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
 		#Check if the mouse is over one of the shapes 
@@ -119,12 +175,26 @@ def pickObject():
 		#If there is an intersection 
 		if item.valid: 
 			#Add mouse over action
-			item.object.remove()
+			bag1Position = bag1.getDst().getPosition()
+			aboveBag1 = [bag1Position[0], bag1Position[1]+0.6, bag1Position[2]]
+			inThaBag1up = vizact.moveTo(aboveBag1,speed=5)
+			inThaBag1down = vizact.moveTo(bag1.getDst().getPosition(),speed=5)
+			item.object.addAction(inThaBag1up)
+			item.object.addAction(inThaBag1down)
+			
+			
+			def removeChosenObject():
+				#item.object.remove()
+				#item.object.disable(viz.RENDERING)
+				item.object.visible((viz.OFF))
+			vizact.ontimer(1.6,removeChosenObject)
+			
 			#Print the point where the line intersects the object.
 			taskA.append(item.object)
+			firstPickObject = item.object
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
 			print taskA[0].name
-			print taskA[0].getPosition()
+			#print taskA[0].getPosition()
 			#print taskA[0].size
 			#print taskA[0].colour
 			print "picked"
@@ -138,7 +208,17 @@ def swapObject():
 		#If there is an intersection 
 		if item.valid: 
 			#Add mouse over action
-			item.object.remove()
+			bag2Position = bag2.getDst().getPosition()
+			aboveBag2 = [bag2Position[0], bag2Position[1]+0.6, bag2Position[2]]
+			inThaBag2up = vizact.moveTo(aboveBag2,speed=5)
+			inThaBag2down = vizact.moveTo(bag2.getDst().getPosition(),speed=5)
+			item.object.addAction(inThaBag2up)
+			item.object.addAction(inThaBag2down)
+			
+			def removeChosenObject():
+				item.object.remove()
+			vizact.ontimer(1.6,removeChosenObject)
+			
 			#Print the point where the line intersects the object.
 			taskA.append(item.object)
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
@@ -147,8 +227,8 @@ def swapObject():
 			return
 
 def selectPhase(participant):
-	global divider
-	global door
+	global divider, door, bag1, bag2, vizact
+
 	panel = vr_utils.displayOnCenterPanel("")
 	#Add vizinfo panel to display instructions
 	if (participant.group == 'a'):
@@ -167,11 +247,15 @@ def selectPhase(participant):
 
 	if (participant.group == 'b'):
 		##open the door
-		divider.collideNone()
+		#divider.collideNone()
 		yield vizproximity.waitEnter(doorStationSensor)
 		
 		spinToYaw90 = vizact.spinTo(euler=[90,0,0], speed=50)
 		door.addAction( spinToYaw90 )
+		
+		#lowerBag = vizact.move(0,-1,0,3)
+		#bag1.addAction(lowerBag)
+		#bag1.postTrans([0,-0.5,0])
 		
 		doorAngle = 0;
 		door.disable(viz.INTERSECTION)
@@ -180,20 +264,47 @@ def selectPhase(participant):
 		#while (doorAngle < 90):
 			#door.setEuler([doorAngle,0,0])
 			#doorAngle +=0.01
+	#else :
+		#yield vizproximity.waitEnter(doorStationSensor)
+		#bag1.postTrans([0,-0.5,0])
 
-	#wait untl ther reach the test table
-	yield vizproximity.waitEnter(stationTwo)
+	#wait until they reach the test table
+	yield vizproximity.waitEnter(stationTwoSensor)
+	print "at station 2"
 	return
 
+def swapClick():
+	global firstPickObject
+	while True:
+		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
+		#Check if the mouse is over one of the shapes 
+		item = viz.MainWindow.pick( info = True )
+		#If there is an intersection 
+		if item.valid: 
+			print "bring object over"
+			print firstPickObject
+			#move object to bag
+			#firstPickObject.enable(viz.RENDERING) # make object visible
+			firstPickObject.visible(viz.ON)
+			firstPickObject.setPosition([0,1,0])
+			#remove object from bag
+		
+			return
+
 def swapPhase(participant):
+
+	print "waiting to click item"
+	#loopin
+	yield swapClick()
+
 	#wait until the user selects a shape
 	yield swapObject()
 	print "Done with waiting for mouse"
 
 	if (participant.group == 'a'):
-		panel = vr_utils.displayOnCenterPanel("Great!. Now just move back to the original desk")
+		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk")
 	else:
-		panel = vr_utils.displayOnCenterPanel("Great!. Now just move back to the original desk in the other room")
+		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk in the other room")
 			
 	panel.visible(viz.ON)
 	yield viztask.waitTime(2)
@@ -201,18 +312,17 @@ def swapPhase(participant):
 
 	if (participant.group == 'b'):
 		##open the door
-		divider.collideNone()
+		#divider.collideNone()
 		yield vizproximity.waitEnter(doorStationSensor)
 		doorAngle = 0;
 		door.addAction( vizact.spin(0,1,0,90) )
-		door.collideNone()
+		#door.collideNone()
 		while (doorAngle < 90):
 			#door.setEuler([doorAngle,0,0])
 			doorAngle +=0.01
 
 	#wait untl ther reach the test table
-	yield vizproximity.waitEnter(stationOne)
-
+	yield vizproximity.waitEnter(stationOneSensor)
 	return
 
 def testPhase(participant):
@@ -230,6 +340,7 @@ def testPhase(participant):
 
 def runExperiment():
 	global divider, door, scale
+	#tool.setUpdateFunction(updateGrabber)
 	#Collect and store participant information
 	participant = yield getParticipantInfo()
 	panel = vr_utils.displayOnCenterPanel(startingInstructions)

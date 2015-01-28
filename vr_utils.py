@@ -11,7 +11,6 @@ import vizinfo
 
 view = None
 resultPanel = None
-startingInstructions = 'test'
 
 def buildScene(walls, roof, scale):
 	#build scene
@@ -30,22 +29,43 @@ def init(viz, viztracker):
 	viz.go()
 	viz.MainWindow.fov(60)
 	#vizshape.addAxes()
-	viz.collision(viz.ON)
 	viz.mouse(viz.OFF)
 	viz.go(viz.FULLSCREEN)
 	viztracker.go()
-	keyTracker = viztracker.Keyboard6DOF()
-	keyTracker.setPosition(0, 1.8, 10) 
-	viz.link(keyTracker, viz.MainView)
-	viztracker.get("movable").setPosition([0,1.8,10])
+	#keyTracker = viztracker.Keyboard6DOF()
+	#keyTracker.setPosition(0, 1.8, 10) 
+	#viz.link(keyTracker, viz.MainView)
+	#viztracker.get("movable").setPosition([0,1.8,10])
 
-def enableNavigation(tracker, viz):
-	tracker = vizcam.addWalkNavigate(forward='w', backward='s', left='a', right='d', moveScale=1.0, turnScale=1.0)
-	tracker.setPosition([0,1,10])
+def makeBag(viewTracker, bagNumber):
+	bag = vizshape.addBox(size = [0.3 ,0.6,0.2], color = viz.WHITE)
+	bag.name = 'BAG' + str(bagNumber)
+	bagLink = viz.link(viewTracker, bag)
+	if (bagNumber == 1):
+		bagLink.postTrans([0,-1,0.5])
+	else:
+		bagLink.postTrans([0,-1,-0.5])
+	return bagLink
+
+def enableNavigation(viewTracker, mouseTracker, viz, viztracker):
+	#viewTracker = vizcam.addWalkNavigate(forward='w', backward='s', left='a', right='d', moveScale=1.0, turnScale=1.0)
+	#viewTracker.setPosition([0,1,10])
+	
+	viewTracker = viztracker.Keyboard6DOF()
+	viewTracker.setPosition([0,1.8,10])
+	viewlink = viz.link( viewTracker, viz.MainView )
+	##viewlink.preTrans([0,1.8,0])
+	
+	#viz.collision(viz.ON)
+	#viz.MainView.collision( viz.ON )
+	viewTracker.collision( viz.ON )
+	viewTracker.gravity (0)
+	#mouseTracker = viztracker.MouseTracker()
+	#trackerlink = viz.link( mouseTracker, arrow )
+	#trackerlink.postTrans([0,0,-4])
 	#viz.MainView.setPosition(0, 1.8, 10) 
 	#viz.link(tracker,viz.MainView)
-
-
+	return viewTracker
 
 def makeShapes( viz, vizshape):
 	#Make selectable shapes
@@ -97,38 +117,7 @@ def makeShapes( viz, vizshape):
 	tri4 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.GREEN)
 	tri4.setPosition([1.2,1.25,-12])
 	tri4.name = 'TRIANGLE_GREEN'
-
-
-def addSensors(stationOne, stationTwo, stationOneSensor, stationTwoSensor, doorStation, doorStationSensor):
-	stationOne = viz.addChild('plant.osgb',pos=[0, 0, 10],scale=[1, 1, 1])
-	stationOne.disable(viz.PICKING)
-	stationOne.disable(viz.RENDERING)
-	stationOneSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=stationOne)
-
-	doorStation = viz.addChild('plant.osgb',pos=[0, 0, 0],scale=[1,1,1])
-	doorStation.disable(viz.PICKING)
-	doorStation.disable(viz.RENDERING)
-	#doorStationSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=doorStation)
-	doorStationSensor = vizproximity.Sensor(vizproximity.Box([2.5,2.5,3.5]),source=viz.Matrix.translate(0,1.75,0))
-
-	stationTwo = viz.addChild('plant.osgb',pos=[0, 0, -12],scale=[1, 1, 1])
-	stationTwo.disable(viz.PICKING)
-	stationTwo.disable(viz.RENDERING)
-	stationTwoSensor = vizproximity.Sensor(vizproximity.Box([3,4,3],center=[0,1.5,1]),source=stationTwo)
-	target = vizproximity.Target(viz.MainView)
-
-	#Create proximity manager
-	manager = vizproximity.Manager()
-
-	#Add destination sensors to manager
-	manager.addSensor(stationOneSensor)
-	manager.addSensor(stationTwoSensor)
-	manager.addSensor(doorStationSensor)
-	#Add viewpoint target to manager
-	manager.addTarget(target)
-
-	#Toggle debug shapes with keypress
-	vizact.onkeydown('t',manager.setDebug,viz.TOGGLE)
+	#tool.setItems([box1, box2, box3, box4, ball1, ball2, ball3, tube1, tube2, tube4, tube3, tri1, tri2, tri3, tri4])
 
 #save results into document
 def saveResults(participant, result):
@@ -153,3 +142,4 @@ def displayOnCenterPanel(text):
 def removeCenterPanel(panel):
 	panel.remove()
 	return
+
