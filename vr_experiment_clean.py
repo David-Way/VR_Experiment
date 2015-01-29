@@ -181,17 +181,13 @@ def pickObject():
 			inThaBag1down = vizact.moveTo(bag1.getDst().getPosition(),speed=5)
 			item.object.addAction(inThaBag1up)
 			item.object.addAction(inThaBag1down)
+			firstPickObject = item.object
 			
-			
-			def removeChosenObject():
-				#item.object.remove()
-				#item.object.disable(viz.RENDERING)
-				item.object.visible((viz.OFF))
-			vizact.ontimer(1.6,removeChosenObject)
+			yield viztask.waitTime(1.6) 
+			firstPickObject.visible((viz.OFF))
 			
 			#Print the point where the line intersects the object.
 			taskA.append(item.object)
-			firstPickObject = item.object
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
 			print taskA[0].name
 			#print taskA[0].getPosition()
@@ -201,7 +197,7 @@ def pickObject():
 			return
 
 def swapObject():
-	global firstPickObject, bag2
+	global firstPickObject, bag2 , secondPickOject
 	while True:
 		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
 		#Check if the mouse is over one of the shapes 
@@ -218,20 +214,22 @@ def swapObject():
 			outtaThaBag2down = vizact.moveTo(item.object.getPosition(),speed=5)
 			firstPickObject.addAction(outtaThaBag2up)
 			firstPickObject.addAction(outtaThaBag2down)
-			
+
 			inThaBag2up = vizact.moveTo(aboveBag2,speed=5)
 			inThaBag2down = vizact.moveTo(bag2.getDst().getPosition(),speed=5)
 			item.object.addAction(inThaBag2up)
 			item.object.addAction(inThaBag2down)
+			secondPickOject = item.object
 			
-			def removeChosenObject():
-				item.object.remove()
-			vizact.ontimer(1.6,removeChosenObject)
-			
+			yield viztask.waitTime(1.6) 
+			firstPickObject.visible(viz.ON)
+			secondPickOject.visible((viz.OFF))
+
 			#Print the point where the line intersects the object.
+
 			taskA.append(item.object)
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
-			print taskA
+			print taskA[0].name
 			print "swapped"
 			return
 
@@ -282,24 +280,7 @@ def selectPhase(participant):
 	print "at station 2"
 	return
 
-def swapClick():
-	global firstPickObject, bag2
-	while True:
-		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
-		#Check if the mouse is over one of the shapes 
-		item = viz.MainWindow.pick( info = True )
-		#If there is an intersection 
-		if item.valid: 
-			print "bring object over"
-			#move object to bag
-			#firstPickObject.enable(viz.RENDERING) # make object visible
-			bag2Position = bag2.getDst().getPosition()
-			
-			firstPickObject.visible(viz.ON)
-			firstPickObject.setPosition(bag2Position)
-			#remove object from bag
-		
-			return
+
 
 def swapPhase(participant):
 
