@@ -200,7 +200,8 @@ def pickObject():
 			print "picked"
 			return
 
-def swapObject(): 
+def swapObject():
+	global firstPickObject, bag2
 	while True:
 		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
 		#Check if the mouse is over one of the shapes 
@@ -209,7 +210,15 @@ def swapObject():
 		if item.valid: 
 			#Add mouse over action
 			bag2Position = bag2.getDst().getPosition()
+			firstPickObject.visible(viz.ON)
+			firstPickObject.setPosition(bag2Position)
 			aboveBag2 = [bag2Position[0], bag2Position[1]+0.6, bag2Position[2]]
+			
+			outtaThaBag2up = vizact.moveTo(aboveBag2,speed=5)
+			outtaThaBag2down = vizact.moveTo(item.object.getPosition(),speed=5)
+			firstPickObject.addAction(outtaThaBag2up)
+			firstPickObject.addAction(outtaThaBag2down)
+			
 			inThaBag2up = vizact.moveTo(aboveBag2,speed=5)
 			inThaBag2down = vizact.moveTo(bag2.getDst().getPosition(),speed=5)
 			item.object.addAction(inThaBag2up)
@@ -274,7 +283,7 @@ def selectPhase(participant):
 	return
 
 def swapClick():
-	global firstPickObject
+	global firstPickObject, bag2
 	while True:
 		yield viztask.waitMouseDown(viz.MOUSEBUTTON_LEFT)
 		#Check if the mouse is over one of the shapes 
@@ -282,11 +291,12 @@ def swapClick():
 		#If there is an intersection 
 		if item.valid: 
 			print "bring object over"
-			print firstPickObject
 			#move object to bag
 			#firstPickObject.enable(viz.RENDERING) # make object visible
+			bag2Position = bag2.getDst().getPosition()
+			
 			firstPickObject.visible(viz.ON)
-			firstPickObject.setPosition([0,1,0])
+			firstPickObject.setPosition(bag2Position)
 			#remove object from bag
 		
 			return
@@ -295,7 +305,7 @@ def swapPhase(participant):
 
 	print "waiting to click item"
 	#loopin
-	yield swapClick()
+	#yield swapClick()
 
 	#wait until the user selects a shape
 	yield swapObject()
