@@ -67,7 +67,7 @@ def enableNavigation(viewTracker, mouseTracker, viz, viztracker):
 	#viz.link(tracker,viz.MainView)
 	return viewTracker
 
-def makeShapes( viz, vizshape):
+def makeShapes1( viz, vizshape):
 	#Make selectable shapes
 	box1 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
 	box1.setPosition([-1,1.35,12])
@@ -86,38 +86,74 @@ def makeShapes( viz, vizshape):
 	box2.name = 'BOX_RED'
 	ball2 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.GREEN)
 	ball2.setPosition([0.6,1.35,12])
-	ball2.name = 'BALL_GREEN'
+	ball2.name = 'SPHERE_GREEN'
 	tube2 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.BLUE)
 	tube2.setPosition([0.9,1.35,12])
 	tube2.name = 'CYCLINDER_BLUE'
 	tri2 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
 	tri2.setPosition([1.2,1.25,12])
 	tri2.name = 'TRIANGLE_YELLOW'
-	box3 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.GREEN)
+	
+
+	#Second row of shapes. 
+	box3 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
 	box3.setPosition([-1,1.35,-12])
-	box3.name = 'BOX_GREEN'
-	ball3 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.BLUE)
+	box3.name = 'BOX_BLUE'
+	ball3 =  vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.YELLOW)
 	ball3.setPosition([-0.7,1.35,-12])
-	ball3.name = 'SPHERE_BLUE'
-	tube3 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.RED)
+	ball3.name =  'SPHERE_YELLOW' 
+	tube3 =vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.GREEN)
 	tube3.setPosition([-0.4,1.35,-12])
-	tube3.name = 'CYLINDER_RED'
-	tri3 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
+	tube3.name = 'CYLINDER_GREEN'
+	tri3 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.PURPLE)
 	tri3.setPosition([-0.1,1.25,-12])
-	tri3.name = 'TRIANGLE_YELLOW'
-	box4 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.PURPLE)
+	tri3.name = 'TRIANGLE_PURPLE'
+	box4 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.RED)
 	box4.setPosition([0.2,1.35,-12])
-	box4.name = 'BOX_PURPLE'
-	ball4 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.BLUE)
+	box4.name =  'BOX_RED'
+	ball4 =vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.GREEN)
 	ball4.setPosition([0.6,1.35,-12])
-	ball4.name = 'SPHERE_BLUE'
-	tube4 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.YELLOW)
+	ball4.name = 'SPHERE_GREEN'
+	tube4 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.BLUE)
 	tube4.setPosition([0.9,1.35,-12])
-	tube4.name = 'CYCLINDER_YELLOW'
-	tri4 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.GREEN)
+	tube4.name = 'CYCLINDER_BLUE'
+	tri4 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
 	tri4.setPosition([1.2,1.25,-12])
-	tri4.name = 'TRIANGLE_GREEN'
-	#tool.setItems([box1, box2, box3, box4, ball1, ball2, ball3, tube1, tube2, tube4, tube3, tri1, tri2, tri3, tri4])
+	tri4.name =  'TRIANGLE_YELLOW'
+	
+	shapesArray = [box1, ball1, tube1, tri1, box2, ball2, tube2, tri2]
+	return shapesArray
+
+
+def makeShapes2( viz, vizshape):
+		#final row of shapes
+	#Make selectable shapes
+	box5 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
+	box5.setPosition([-1,1.35,12])
+	box5.name = 'BOX_BLUE'
+	ball5 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.YELLOW)
+	ball5.setPosition([-0.7,1.35,12])
+	ball5.name = 'SPHERE_YELLOW'
+	tube5 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.GREEN)
+	tube5.setPosition([-0.4,1.35,12])
+	tube5.name = 'CYLINDER_GREEN'
+	tri5 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.PURPLE)
+	tri5.setPosition([-0.1,1.25,12])
+	tri5.name = 'TRIANGLE_PURPLE'
+	box6 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.RED)
+	box6.setPosition([0.2,1.35,12])
+	box6.name = 'BOX_RED'
+	ball6 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.GREEN)
+	ball6.setPosition([0.6,1.35,12])
+	ball6.name = 'SPHERE_GREEN'
+	tube6 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.BLUE)
+	tube6.setPosition([0.9,1.35,12])
+	tube6.name = 'CYCLINDER_BLUE'
+	tri6 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
+	tri6.setPosition([1.2,1.25,12])
+	tri6.name = 'TRIANGLE_YELLOW'
+	shapesArray = [box5, ball5, tube5, tri5, box6, ball6, tube6, tri6]
+	return shapesArray
 
 #save results into document
 def saveResults(participant, result):

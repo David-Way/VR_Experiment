@@ -28,6 +28,8 @@ stationOne = stationTwo = stationOneSensor = stationTwoSensor = doorStation = do
 viewTracker = mouseTracker = None
 taskA = []
 firstPickObject = secondPickObject = None
+shapes = []
+
 #Strings
 startingInstructions = """Controls: W = Forward, S = Back, D = Right, A = Left. \nPress the spacebar to continue and follow the instructions given"""
 selectPhaseInstructionsGroupA = """Select the Red Cube, this will put it in the bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the blue sphere by clicking with the mouse"""
@@ -45,7 +47,7 @@ bag2 = vr_utils.makeBag(viewTracker, 2)
 vr_utils.buildScene(walls, roof, scale)
 
 #Add the shapes to the scene
-vr_utils.makeShapes(viz, vizshape)
+shapes = vr_utils.makeShapes1(viz, vizshape)
 
 def exitStationOne(e):
 	global bag1
@@ -182,6 +184,7 @@ def pickObject():
 			item.object.addAction(inThaBag1up)
 			item.object.addAction(inThaBag1down)
 			firstPickObject = item.object
+			print firstPickObject.getPosition();
 			
 			yield viztask.waitTime(1.6) 
 			firstPickObject.visible((viz.OFF))
@@ -229,7 +232,7 @@ def swapObject():
 
 			taskA.append(item.object)
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
-			print taskA[0].name
+			print taskA[1].name
 			print "swapped"
 			return
 
@@ -291,7 +294,6 @@ def swapPhase(participant):
 	#wait until the user selects a shape
 	yield swapObject()
 	print "Done with waiting for mouse"
-	panel.fontSize(70)
 	if (participant.group == 'a'):
 		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk")
 	else:
@@ -300,7 +302,10 @@ def swapPhase(participant):
 	panel.visible(viz.ON)
 	yield viztask.waitTime(2)
 	panel.visible(viz.OFF)
-
+	for s in shapes:
+		s.visible(viz.OFF) 
+	firstPickObject.visible(viz.ON)
+	vr_utils.makeShapes2(viz, vizshape)
 	if (participant.group == 'b'):
 		##open the door
 		#divider.collideNone()
