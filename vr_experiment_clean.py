@@ -29,11 +29,12 @@ viewTracker = mouseTracker = None
 taskA = []
 firstPickObject = secondPickObject = None
 shapes = []
+timerCount = 0
 
 #Strings
 startingInstructions = """Controls: W = Forward, S = Back, D = Right, A = Left. \nPress the spacebar to continue and follow the instructions given"""
-selectPhaseInstructionsGroupA = """Select the Red Cube, this will put it in the bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the blue sphere by clicking with the mouse"""
-selectPhaseInstructionsGroupB = """Select the Red Cube, this will put it in the bag. \nThen move to the desk in the room behind you. \nSwap the shape in your bag with the blue sphere by clicking with the mouse"""
+selectPhaseInstructionsGroupA = """Select the RED CUBE, this will put it in the bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking with the mouse"""
+selectPhaseInstructionsGroupB = """Select the RED CUBE, this will put it in the bag. \nThen move to the desk in the room behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking with the mouse"""
 
 #Set up vizard
 vr_utils.init(viz, viztracker)
@@ -119,6 +120,7 @@ def getParticipantInfo():
 	global divider, door, scale
 	#Add an InfoPanel with a title bar
 	participantInfo = vizinfo.InfoPanel('',title='Participant Information', align=viz.ALIGN_CENTER, icon=False)
+	participantInfo.getPanel().fontSize(40)
 
 	#Add name and ID fields
 	textbox_first = participantInfo.addLabelItem('First Name',viz.addTextbox())
@@ -190,9 +192,9 @@ def pickObject():
 			firstPickObject.visible((viz.OFF))
 			
 			#Print the point where the line intersects the object.
-			taskA.append(item.object)
+			taskA.append(item.object.name)
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
-			print taskA[0].name
+			print taskA
 			#print taskA[0].getPosition()
 			#print taskA[0].size
 			#print taskA[0].colour
@@ -230,16 +232,15 @@ def swapObject():
 
 			#Print the point where the line intersects the object.
 
-			taskA.append(item.object)
+			taskA.append(item.object.name)
 			viz.callback(viz.MOUSEDOWN_EVENT, 0)
-			print taskA[1].name
+			print taskA
 			print "swapped"
 			return
 
 def selectPhase(participant):
 	global divider, door, bag1, bag2, vizact
 	panel = vr_utils.displayOnCenterPanel("")
-	panel.fontSize(24)
 	#Add vizinfo panel to display instructions
 	if (participant.group == 'a'):
 		panel.setText(selectPhaseInstructionsGroupA)
@@ -248,11 +249,12 @@ def selectPhase(participant):
 
 	panel.visible(viz.ON)
 	#count the user in
-	yield viztask.waitTime(2)
+	yield viztask.waitTime(10)
 
 	panel.visible(viz.OFF)
 
 	yield pickObject()
+	vizact.ontimer(1,dostuff)
 	print "Done with waiting for mouse"
 
 	if (participant.group == 'b'):
@@ -321,6 +323,11 @@ def swapPhase(participant):
 	yield vizproximity.waitEnter(stationOneSensor)
 	return
 
+def dostuff():
+	global timerCount
+	timerCount = timerCount + 1
+	print timerCount
+
 def testPhase(participant):
 	panel = vr_utils.displayOnCenterPanel("")
 	panel.setText("Click on the shape you currently have in your backpack.")
@@ -330,9 +337,26 @@ def testPhase(participant):
 	panel.visible(viz.OFF)
 	yield pickObject()
 	print "Done with waiting for mouse"
-	result = Result("1")
+	#result = Result("1")
+	result = getResults()
 	#save the results to a document
 	viztask.returnValue(result)
+
+def getResults():
+	results = []
+	if taskA[0] == 'BOX_RED':
+		results.append("Correct")
+	else:
+		results.append("Incorrect")
+	if taskA[1] == 'SPHERE_GREEN':
+		results.append("Correct")
+	else:
+		results.append("Incorrect")
+	if taskA[2] == taskA[1]:
+		results.append("Correct")
+	else:
+		results.append("Incorrect")
+	return results
 
 def runExperiment():
 	global divider, door, scale
@@ -340,7 +364,7 @@ def runExperiment():
 	#Collect and store participant information
 	participant = yield getParticipantInfo()
 	panel = vr_utils.displayOnCenterPanel(startingInstructions)
-	print "divider>"
+	print "divider"
 	print divider
 	#Wait for spacebar to begin experiment
 	yield viztask.waitKeyDown(' ')
@@ -355,7 +379,8 @@ def runExperiment():
 	print "result phase"
 	#begin the test phase, store the results, results saved
 	result = yield testPhase(participant)
-	vr_utils.saveResults(participant, result)
+	print result
+	vr_utils.saveResults(participant, result, timerCount)
 	print 'Experiment Complete.'
 
 viztask.schedule(runExperiment)

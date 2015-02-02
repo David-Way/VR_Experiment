@@ -70,55 +70,55 @@ def enableNavigation(viewTracker, mouseTracker, viz, viztracker):
 def makeShapes1( viz, vizshape):
 	#Make selectable shapes
 	box1 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
-	box1.setPosition([-1,1.35,12])
+	box1.setPosition([-0.1,1.35,12])
 	box1.name = 'BOX_BLUE'
 	ball1 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.YELLOW)
-	ball1.setPosition([-0.7,1.35,12])
+	ball1.setPosition([0.6,1.35,12])
 	ball1.name = 'SPHERE_YELLOW'
 	tube1 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.GREEN)
-	tube1.setPosition([-0.4,1.35,12])
+	tube1.setPosition([-1,1.35,12])
 	tube1.name = 'CYLINDER_GREEN'
 	tri1 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.PURPLE)
-	tri1.setPosition([-0.1,1.25,12])
+	tri1.setPosition([0.9,1.25,12])
 	tri1.name = 'TRIANGLE_PURPLE'
 	box2 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.RED)
-	box2.setPosition([0.2,1.35,12])
+	box2.setPosition([-0.7,1.35,12])
 	box2.name = 'BOX_RED'
 	ball2 = vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.GREEN)
-	ball2.setPosition([0.6,1.35,12])
+	ball2.setPosition([1.2,1.35,12])
 	ball2.name = 'SPHERE_GREEN'
 	tube2 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.BLUE)
-	tube2.setPosition([0.9,1.35,12])
+	tube2.setPosition([-0.4,1.35,12])
 	tube2.name = 'CYCLINDER_BLUE'
 	tri2 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
-	tri2.setPosition([1.2,1.25,12])
+	tri2.setPosition([0.2,1.25,12])
 	tri2.name = 'TRIANGLE_YELLOW'
 	
 
 	#Second row of shapes. 
 	box3 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.BLUE)
-	box3.setPosition([-1,1.35,-12])
+	box3.setPosition([0.6,1.35,-12])
 	box3.name = 'BOX_BLUE'
 	ball3 =  vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.YELLOW)
-	ball3.setPosition([-0.7,1.35,-12])
+	ball3.setPosition([-0.4,1.35,-12])
 	ball3.name =  'SPHERE_YELLOW' 
 	tube3 =vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.GREEN)
-	tube3.setPosition([-0.4,1.35,-12])
+	tube3.setPosition([1.2,1.35,-12])
 	tube3.name = 'CYLINDER_GREEN'
 	tri3 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.PURPLE)
 	tri3.setPosition([-0.1,1.25,-12])
 	tri3.name = 'TRIANGLE_PURPLE'
 	box4 = vizshape.addBox(size = [0.2,0.2,0.2], color = viz.RED)
-	box4.setPosition([0.2,1.35,-12])
+	box4.setPosition([0.9,1.35,-12])
 	box4.name =  'BOX_RED'
 	ball4 =vizshape.addSphere(radius=0.1,slices=10,stacks=10, color = viz.GREEN)
-	ball4.setPosition([0.6,1.35,-12])
+	ball4.setPosition([0.2,1.35,-12])
 	ball4.name = 'SPHERE_GREEN'
 	tube4 = vizshape.addCylinder(height=0.2,radius=0.1,topRadius=None,bottomRadius=None,slices=10,bottom=True,top=True, color = viz.BLUE)
-	tube4.setPosition([0.9,1.35,-12])
+	tube4.setPosition([-1,1.35,-12])
 	tube4.name = 'CYCLINDER_BLUE'
 	tri4 = vizshape.addPyramid(base=(0.2,0.2),height=0.2, color = viz.YELLOW)
-	tri4.setPosition([1.2,1.25,-12])
+	tri4.setPosition([-0.7,1.25,-12])
 	tri4.name =  'TRIANGLE_YELLOW'
 	
 	shapesArray = [box1, ball1, tube1, tri1, box2, ball2, tube2, tri2]
@@ -156,7 +156,7 @@ def makeShapes2( viz, vizshape):
 	return shapesArray
 
 #save results into document
-def saveResults(participant, result):
+def saveResults(participant, result, timer):
 	print 'Saving results...'
 	#Write the data to our file.
 	question_data = open('results.txt','a')
@@ -166,14 +166,15 @@ def saveResults(participant, result):
 	data += "\ngroup: " + participant.group
 	data += "\nage group: " + participant.ageGroup
 
-	data += "\nresults: " + str(result) +"\t"
+	data += "\nresults: " + str(result)
+	data += "\ntime: " + str(timer) +"\t"
 	question_data.write(data)
 	#Flush the internal buffer.
 	question_data.flush()
 	return
 
 def displayOnCenterPanel(text):
-	return vizinfo.InfoPanel(text,align=viz.ALIGN_CENTER,fontSize=22,icon=False,key=None)
+	return vizinfo.InfoPanel(text,align=viz.ALIGN_CENTER,fontSize=42,icon=False,key=None)
 
 def removeCenterPanel(panel):
 	panel.remove()
