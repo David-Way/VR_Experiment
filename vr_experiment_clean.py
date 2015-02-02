@@ -30,8 +30,8 @@ taskA = []
 firstPickObject = secondPickObject = None
 #Strings
 startingInstructions = """Controls: W = Forward, S = Back, D = Right, A = Left. \nPress the spacebar to continue and follow the instructions given"""
-selectPhaseInstructionsGroupA = """Select the blue triangle, this will put it in your backpack. \nThen move to the desk behind you. \nSwap the shape in your backpack with the yellow sphere by clicking with the mouse"""
-selectPhaseInstructionsGroupB = """Select the blue triangle, this will put it in your backpack. \nThen move to the desk in the room behind you. \nSwap the shape in your backpack with the yellow sphere by clicking with the mouse"""
+selectPhaseInstructionsGroupA = """Select the Red Cube, this will put it in the bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the blue sphere by clicking with the mouse"""
+selectPhaseInstructionsGroupB = """Select the Red Cube, this will put it in the bag. \nThen move to the desk in the room behind you. \nSwap the shape in your bag with the blue sphere by clicking with the mouse"""
 
 #Set up vizard
 vr_utils.init(viz, viztracker)
@@ -235,8 +235,8 @@ def swapObject():
 
 def selectPhase(participant):
 	global divider, door, bag1, bag2, vizact
-
 	panel = vr_utils.displayOnCenterPanel("")
+	panel.fontSize(24)
 	#Add vizinfo panel to display instructions
 	if (participant.group == 'a'):
 		panel.setText(selectPhaseInstructionsGroupA)
@@ -291,7 +291,7 @@ def swapPhase(participant):
 	#wait until the user selects a shape
 	yield swapObject()
 	print "Done with waiting for mouse"
-
+	panel.fontSize(70)
 	if (participant.group == 'a'):
 		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk")
 	else:
