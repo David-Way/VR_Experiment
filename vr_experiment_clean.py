@@ -156,7 +156,7 @@ def getParticipantInfo():
 
 	#if the person is a menber of the group B
 	if (data.group == 'b'):
-		#load the diving wall and door, hide them
+		#load the diving wall and door, hide them  
 		divider = viz.addChild('models/new/divider_large_2.osgb')
 		divider.setScale(scale, scale, scale)
 		divider.setPosition([0,0,20])
