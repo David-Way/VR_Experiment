@@ -32,9 +32,9 @@ shapes = []
 timerCount = 0
 
 #Strings
-startingInstructions = """Controls: W = Forward, S = Back, D = Right, A = Left. \nPress the spacebar to continue and follow the instructions given"""
-selectPhaseInstructionsGroupA = """Select the RED CUBE, this will put it in the bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking with the mouse"""
-selectPhaseInstructionsGroupB = """Select the RED CUBE, this will put it in the bag. \nThen move to the desk in the room behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking with the mouse"""
+startingInstructions = """Please read these instructions: \nControls: W = Move Forward, S = Move Back, D = Move Right, \nA = Move Left, Left Mouse to select objects. \n\nIn the next section you will be given 10 seconds to read and memorise a task. \nPlease ask the the tester if you have any questions before continuing.\n\nPress the spacebar to continue when ready."""
+selectPhaseInstructionsGroupA = """Select the RED CUBE, this will put it in your bag. \nThen move to the desk behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking it with the mouse."""
+selectPhaseInstructionsGroupB = """Select the RED CUBE, this will put it in your bag. \nThen move to the desk in the room behind you. \nSwap the shape in your bag with the GREEN SPHERE by clicking it with the mouse."""
 
 #Set up vizard
 vr_utils.init(viz, viztracker)
@@ -131,9 +131,10 @@ def getParticipantInfo():
 	#Add gender and age fields
 	radiobutton_male = participantInfo.addLabelItem('Male',viz.addRadioButton(0))
 	radiobutton_female = participantInfo.addLabelItem('Female',viz.addRadioButton(0))
-	droplist_age = participantInfo.addLabelItem('Age',viz.addDropList())
-	ageList = ['18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33', '34', '35', '36', '37', '38', '39', '40+']
-	droplist_age.addItems(ageList)
+	textbox_age = participantInfo.addLabelItem('Age',viz.addTextbox())
+	#droplist_age = participantInfo.addLabelItem('Age',viz.addDropList())
+	#ageList = ['18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33', '34', '35', '36', '37', '38', '39', '40+']
+	#droplist_age.addItems(ageList)
 	participantInfo.addSeparator(padding=(20,20))
 
 	#Add submit button aligned to the right and wait until it's pressed
@@ -145,7 +146,8 @@ def getParticipantInfo():
 	data.lastName = textbox_last.get()
 	data.firstName = textbox_first.get()
 	data.group = textbox_group.get().lower()
-	data.ageGroup = ageList[droplist_age.getSelection()]
+	data.ageGroup = textbox_age.get()
+	#data.ageGroup = ageList[droplist_age.getSelection()]
 
 	if radiobutton_male.get() == viz.DOWN:
 		data.gender = 'male'
@@ -165,7 +167,7 @@ def getParticipantInfo():
 		door.setPosition([0,0,20])
 		door.disable(viz.PICKING)
 		divider.setPosition([0,0,0])
-		door.setPosition([-0.6,0,0])
+		door.setPosition([-0.65,0,0])
 	participantInfo.remove()
 	# Return participant data
 	viztask.returnValue(data)
@@ -188,7 +190,7 @@ def pickObject():
 			firstPickObject = item.object
 			print firstPickObject.getPosition();
 			
-			yield viztask.waitTime(1.6) 
+			yield viztask.waitTime(0.6) 
 			firstPickObject.visible((viz.OFF))
 			
 			#Print the point where the line intersects the object.
@@ -226,7 +228,7 @@ def swapObject():
 			item.object.addAction(inThaBag2down)
 			secondPickOject = item.object
 			
-			yield viztask.waitTime(1.6) 
+			yield viztask.waitTime(0.6) 
 			firstPickObject.visible(viz.ON)
 			secondPickOject.visible((viz.OFF))
 
@@ -249,7 +251,7 @@ def selectPhase(participant):
 
 	panel.visible(viz.ON)
 	#count the user in
-	yield viztask.waitTime(10)
+	yield viztask.waitTime(11)
 
 	panel.visible(viz.OFF)
 
@@ -297,12 +299,12 @@ def swapPhase(participant):
 	yield swapObject()
 	print "Done with waiting for mouse"
 	if (participant.group == 'a'):
-		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk")
+		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk.")
 	else:
-		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk in the other room")
+		panel = vr_utils.displayOnCenterPanel("Great! Now just move back to the original desk in the other room.")
 			
 	panel.visible(viz.ON)
-	yield viztask.waitTime(2)
+	yield viztask.waitTime(4)
 	panel.visible(viz.OFF)
 	for s in shapes:
 		s.visible(viz.OFF) 
@@ -333,7 +335,7 @@ def testPhase(participant):
 	panel.setText("Click on the shape you currently have in your backpack.")
 	panel.visible(viz.ON)
 	#count the user in
-	yield viztask.waitTime(2)
+	yield viztask.waitTime(4)
 	panel.visible(viz.OFF)
 	yield pickObject()
 	print "Done with waiting for mouse"
@@ -382,5 +384,6 @@ def runExperiment():
 	print result
 	vr_utils.saveResults(participant, result, timerCount)
 	print 'Experiment Complete.'
+	panel = vr_utils.displayOnCenterPanel("Experiment complete!")
 
 viztask.schedule(runExperiment)

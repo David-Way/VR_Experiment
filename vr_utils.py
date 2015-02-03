@@ -164,7 +164,7 @@ def saveResults(participant, result, timer):
 	data += "\nfirst name: " + participant.firstName
 	data += "\nlast name: " + participant.lastName
 	data += "\ngroup: " + participant.group
-	data += "\nage group: " + participant.ageGroup
+	data += "\nage: " + participant.ageGroup
 
 	data += "\nresults: " + str(result)
 	data += "\ntime: " + str(timer) +"\t"
